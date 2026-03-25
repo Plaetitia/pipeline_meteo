@@ -1,0 +1,13 @@
+stages:
+  - deploy
+
+run_airflow_pipeline:
+  stage: deploy
+  tags:
+    - macos
+  script:
+    - echo "Lancement du projet sur Docker..."
+    - docker-compose down --remove-orphans
+    - docker-compose up -d
+    - sleep 15
+    - docker ps
