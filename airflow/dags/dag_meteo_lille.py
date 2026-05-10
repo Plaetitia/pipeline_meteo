@@ -8,6 +8,7 @@ import json
 # Configuration via variables d'environnement Docker
 API_KEY = os.getenv('METEO_API_KEY')
 API_URL = os.getenv('METEO_API_URL')
+headers = {'apikey': API_KEY}
 OUTPUT_DIR = "/opt/airflow/data/raw"
 
 default_args = {
@@ -18,7 +19,7 @@ default_args = {
 
 def fetch_meteo_lille():
     params = {'id_station': '59351002', 'referentiel': 'DATE_ISO'}
-    headers = {'Authorization': f'Bearer {API_KEY}', 'accept': 'application/json'}
+    headers = {'apikey': API_KEY, 'accept': 'application/json'}
     
     response = requests.get(API_URL, headers=headers, params=params)
     response.raise_for_status()
@@ -29,15 +30,3 @@ def fetch_meteo_lille():
     with open(file_path, 'w') as f:
         json.dump(response.json(), f)
     print(f"Fichier créé : {file_path}")
-
-with DAG(
-    'collecte_meteo_lille',
-    default_args=default_args,
-    schedule_interval='@hourly',
-    catchup=False
-) as dag:
-
-    task_get_meteo = PythonOperator(
-        task_id='fetch_meteo_lille',
-        python_callable=fetch_meteo_lille,
-    )
