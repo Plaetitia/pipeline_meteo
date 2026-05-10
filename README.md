@@ -7,11 +7,11 @@ les traite avec Spark et les stocke dans PostgreSQL.
 Le pipeline est orchestré par Apache Airflow et déployé via GitLab CI/CD.
 
 # Architecture
-API Météo-France ->Kafka -> HDFS -> Spark  ->  PostgreSQL -> Airflow (orchestration ETL)
+API Météo-France ->Kafka -> MinIO -> Spark  ->  PostgreSQL -> Airflow (orchestration ETL)
 ## Technologies
 - **Apache Kafka** : ingestion des flux temps réel
 - **Apache Spark** : traitement distribué
-- **HDFS** : stockage Data Lake
+- - **MinIO** : stockage Data Lake (remplace HDFS)
 - **PostgreSQL** : stockage final pour analyse
 - **Apache Airflow** : orchestration ETL
 - **Docker** : conteneurisation
