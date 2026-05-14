@@ -17,7 +17,7 @@ default_args = {
 }
 
 def fetch_meteo_lille():
-    params = {'id_station': '59351002', 'format': 'json'}
+    params = {'id_station': '59343001', 'format': 'json'}
     headers = {'apikey': API_KEY, 'accept': 'application/json'}
     
     response = requests.get(API_URL, headers=headers, params=params)
