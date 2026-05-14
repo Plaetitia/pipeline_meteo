@@ -17,18 +17,23 @@ default_args = {
 }
 
 def fetch_meteo_lille():
-    params = {'id_station': '59351002'}
+    params = {'id_station': '59351002', 'format': 'json'}
     headers = {'apikey': API_KEY, 'accept': 'application/json'}
     
     response = requests.get(API_URL, headers=headers, params=params)
     response.raise_for_status()
     
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
-    file_path = f"{OUTPUT_DIR}/meteo_lille_{timestamp}.json"
-    
-    with open(file_path, 'w') as f:
-        json.dump(response.json(), f)
-    print(f"Fichier créé : {file_path}")
+    data = response.json()
+    print(f"Données reçues : {data}")
+
+    if data:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+        file_path = f"{OUTPUT_DIR}/meteo_lille_{timestamp}.json"
+        with open(file_path, 'w') as f:
+            json.dump(data, f)
+        print(f"Fichier créé : {file_path}")
+    else:
+        print("Pas de données disponibles pour le moment")
 
 with DAG(
     'collecte_meteo_lille',
