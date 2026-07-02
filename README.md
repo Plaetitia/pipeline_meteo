@@ -11,7 +11,7 @@ API Météo-France ->Kafka -> MinIO -> Spark  ->  PostgreSQL -> Airflow (orchest
 ## Technologies
 - **Apache Kafka** : ingestion des flux temps réel
 - **Apache Spark** : traitement distribué
-- - **MinIO** : stockage Data Lake (remplace HDFS)
+- **MinIO** : stockage Data Lake (remplace HDFS)
 - **PostgreSQL** : stockage final pour analyse
 - **Apache Airflow** : orchestration ETL
 - **Docker** : conteneurisation
