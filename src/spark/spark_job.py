@@ -1,37 +1,42 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, from_json
+from pyspark.sql.functions import col
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
-# Créer la session Spark
-spark = SparkSession.builder \
-    .appName("MeteoTransformation") \
-    .getOrCreate()
-
-# Schéma des données météo
-schema = StructType([
-    StructField("id_station", StringType()),
-    StructField("temperature", DoubleType()),
-    StructField("humidite", DoubleType()),
-    StructField("vent", DoubleType()),
-    StructField("pression", DoubleType()),
-    StructField("date", StringType())
-])
-
 def process():
-    # Lire depuis HDFS
-    df = spark.read.json("hdfs://namenode:9000/meteo/raw/")
+    # 1. Créer la session Spark avec le driver JDBC PostgreSQL inclus
+    spark = SparkSession.builder \
+        .appName("MeteoTransformation") \
+        .config("spark.jars.packages", "org.postgresql:postgresql:42.6.0") \
+        .getOrCreate()
 
-    # Nettoyage : supprimer les lignes vides
+    # 2. Source des données : 
+    # (Si ton étape précédente enregistre un fichier JSON dans un dossier local partagé, par exemple /opt/airflow/src/data/raw.json)
+    # Ajuste ce chemin selon l'endroit où l'API sauvegarde les données brutes.
+    input_path = "/opt/airflow/src/data/meteo_raw.json" 
+    
+    try:
+        df = spark.read.json(input_path)
+    except Exception as e:
+        print(f"Aucun fichier trouvé à lire pour l'instant : {e}")
+        return
+
+    # 3. Nettoyage et Transformation
     df_clean = df.dropna()
+    df_filtered = df_clean.filter(col("t") > -50)
 
-    # Transformation : filtrer temperature > -50
-    df_filtered = df_clean.filter(col("temperature") > -50)
+    # 4. Écriture directe dans PostgreSQL
+    # Les identifiants correspondent à ton fichier .env / docker-compose
+    postgres_url = "jdbc:postgresql://postgres:5432/airflow"
+    postgres_properties = {
+        "user": "airflow",
+        "password": "airflow", # Remplace par ta variable si besoin
+        "driver": "org.postgresql.Driver"
+    }
 
-    # Sauvegarder dans HDFS (données propres)
-    df_filtered.write.mode("overwrite") \
-        .parquet("hdfs://namenode:9000/meteo/clean/")
+    df_filtered.write \
+        .jdbc(url=postgres_url, table="meteo_lille", mode="append", properties=postgres_properties)
 
-    print("Traitement Spark terminé !")
+    print("Traitement Spark terminé et données insérées dans PostgreSQL !")
 
 if __name__ == "__main__":
     process()
