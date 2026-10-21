@@ -20,9 +20,8 @@ def process():
         print(f"Aucun fichier trouvé à lire pour l'instant : {e}")
         return
 
-    # 3. Nettoyage et Transformation
-    df_clean = df.dropna()
-    df_filtered = df_clean.filter(col("t") > -50)
+    # 3. Nettoyage et Transformation (on filtre uniquement sur les colonnes clés si elles sont nulles)
+    df_filtered = df.dropna(subset=["validity_time", "t"]).filter(col("t") > -50)
 
     # 4. Écriture directe dans PostgreSQL
     # Les identifiants correspondent à ton fichier .env / docker-compose

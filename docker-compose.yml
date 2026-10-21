@@ -60,5 +60,17 @@ services:
       - ./src:/opt/airflow/src
     command: scheduler
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - default
+    restart: unless-stopped
+
 volumes:
   postgres_data:
